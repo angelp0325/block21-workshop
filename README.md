@@ -38,13 +38,6 @@ Your submission should meet the following requirements:
 - The application is rerendered whenever state changes.
 - UI elements are organized into component functions.
 
-## Extensions
-
-If you're done early, try to implement one or more of the following features:
-
-- Allow administrators to invite guests to a party. This will involve creating an appropriate RSVP.
-- Allow administrators to un-invite guests from a party. This will involve deleting the appropriate RSVP.
-
 ## Submission
 
 Please submit the link to your public GitHub repository.
