@@ -1,6 +1,6 @@
 // === Constants ===
 const BASE = "https://fsa-crud-2aa9294fe819.herokuapp.com/api";
-const COHORT = ""; // Make sure to change this!
+const COHORT = "/2109-CPU-RM-WEB-PT";
 const API = BASE + COHORT;
 
 // === State ===
@@ -104,6 +104,7 @@ function SelectedParty() {
     <GuestList></GuestList>
   `;
   $party.querySelector("GuestList").replaceWith(GuestList());
+  $party.append(DeletePartyButton(selectedParty.id));
 
   return $party;
 }
@@ -128,6 +129,83 @@ function GuestList() {
   return $ul;
 }
 
+function NewPartyForm() {
+  const $form = document.createElement("form");
+  $form.innerHTML = `
+    <h2>Create New Party</h2>
+    <label>
+      Name:
+      <input name="name" required />
+    </label>
+    <label>
+      Description:
+      <input name="description" required />
+    </label>
+    <label>
+      Date:
+      <input name="date" type="date" required />
+    </label>
+    <label>
+      Location:
+      <input name="location" required />
+    </label>
+    <button type="submit">Add Party</button>
+  `;
+
+  $form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData($form);
+    const newParty = {
+      name: formData.get("name"),
+      description: formData.get("description"),
+      date: new Date(formData.get("date")).toISOString(),
+      location: formData.get("location"),
+    };
+
+    try {
+      const response = await fetch(API + "/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newParty),
+      });
+
+      if (!response.ok) throw new Error("Failed to create party");
+
+      await getParties();
+      $form.reset();
+    } catch (e) {
+      console.error("Error creating party:", e);
+    }
+  });
+
+  return $form;
+}
+
+function DeletePartyButton(partyId) {
+  const $button = document.createElement("button");
+  $button.textContent = "Delete Party";
+
+  $button.addEventListener("click", async () => {
+    if (!confirm("Are you sure you want to delete this party?")) return;
+
+    try {
+      const response = await fetch(`${API}/events/${partyId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete party");
+
+      selectedParty = null;
+      await getParties();
+    } catch (e) {
+      console.error("Error deleting party:", e);
+    }
+  });
+
+  return $button;
+}
+
 // === Render ===
 function render() {
   const $app = document.querySelector("#app");
@@ -138,6 +216,10 @@ function render() {
         <h2>Upcoming Parties</h2>
         <PartyList></PartyList>
       </section>
+      <section>
+        <h2>Create New Party</h2>
+        <NewPartyForm></NewPartyForm>
+      </section>
       <section id="selected">
         <h2>Party Details</h2>
         <SelectedParty></SelectedParty>
@@ -146,6 +228,7 @@ function render() {
   `;
 
   $app.querySelector("PartyList").replaceWith(PartyList());
+  $app.querySelector("NewPartyForm").replaceWith(NewPartyForm());
   $app.querySelector("SelectedParty").replaceWith(SelectedParty());
 }
 
